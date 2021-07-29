@@ -433,10 +433,17 @@ double *getObjectiveVector(double *objv, struct solution *s)
     if (s->evalv) /* solution s is evaluated */
         *objv = s->objv;
     else { /* solution s is not evaluated */
-        /*
-         * IMPLEMENT HERE
-         */
-        *objv = s->objv = obj;
+        for(int i = 0; i < s->prob->n; ++i) {
+            double groupObjVal = 0;
+            for(int j = 0; j < s->group_sizes[i]; ++j) {
+                for(int k = j+1; k < s->group_sizes[i]; ++k) {
+                    index = index_calc(s->groups[i][j], s->groups[i][k], s->prob->n);
+                    groupObjVal += s->prob->matrix[index];
+                }
+            }
+            obj += groupObjVal;
+        }
+        *objv = s->objv = -obj;
         s->evalv = 1;
     }
     return objv;
@@ -451,10 +458,17 @@ double *getObjectiveLB(double *objLB, struct solution *s)
     if (s->evalLB) /* solution s is evaluated */
         *objLB = s->objLB;
     else { /* solution s is not evaluated */
-        /*
-         * IMPLEMENT HERE
-         */
-        *objLB = s->objLB = obj;
+        double value;
+        for(int j = cur_num_components; j < s->prob->n; ++j) {
+            for(int k = j+1; k < s->prob->n; ++k) {
+                index = index_calc(j, k, s->prob->n);
+                value = s->prob->matrix[index];
+                if (value > 0) {
+                    obj += value;
+                }
+            }
+        }
+        *objLB = s->objLB = -obj;
         s->evalLB = 1;
     }
     return objLB;
@@ -497,9 +511,7 @@ struct solution *applyMove(struct solution *s, const struct move *v, const enum 
  */
 int isFeasible(struct solution *s)
 {
-    /*
-     * IMPLEMENT HERE
-     */
+    return s->cur_num_components == s->prob->n;
 }
 
 /*
@@ -530,9 +542,19 @@ long getNeighbourhoodSize(struct solution *s, const enum SubNeighbourhood nh)
 {
     switch (nh) {
     case ADD:
-        /*
-         * IMPLEMENT HERE
-         */
+        if (s->cur_num_components == s->prob->n) {
+            return 0;
+        }
+        else {
+            return cur_num_groups + 1;
+        }
+    case REMOVE:
+        if (s->cur_num_components == 0) {
+            return 0;
+        }
+        else {
+            return 1;
+        }
     default:
         fprintf(stderr, "Invalid neighbourhood passed to getNeighbourhoodSize().\n");
         break;
