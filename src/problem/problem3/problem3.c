@@ -392,6 +392,19 @@ struct solution *emptySolution(struct solution *s)
     /*
      * IMPLEMENT HERE
      */
+    for(int i = 0; i < s->prob->n; ++i){
+        s->nodes[i] = -1;
+        s->group_sizes[i] = 0;
+    }
+
+    s->cur_num_components = 0;
+    s->cur_num_groups = 0;
+    s->objvalue = 0;
+    s->evalv = 0;
+    s->objv = 0;
+    s->evalLB = 0;
+    s->objLB = 0;
+
     return s;
 }
 
@@ -437,7 +450,7 @@ double *getObjectiveVector(double *objv, struct solution *s)
             double groupObjVal = 0;
             for(int j = 0; j < s->group_sizes[i]; ++j) {
                 for(int k = j+1; k < s->group_sizes[i]; ++k) {
-                    index = index_calc(s->groups[i][j], s->groups[i][k], s->prob->n);
+                    int index = index_calc(s->groups[i][j], s->groups[i][k], s->prob->n);
                     groupObjVal += s->prob->matrix[index];
                 }
             }
@@ -459,9 +472,9 @@ double *getObjectiveLB(double *objLB, struct solution *s)
         *objLB = s->objLB;
     else { /* solution s is not evaluated */
         double value;
-        for(int j = cur_num_components; j < s->prob->n; ++j) {
-            for(int k = j+1; k < s->prob->n; ++k) {
-                index = index_calc(j, k, s->prob->n);
+        for(int j = s->cur_num_components; j < s->prob->n; ++j) {
+            for(int k = 0; k < s->prob->n; ++k) {
+                int index = index_calc(j, k, s->prob->n);
                 value = s->prob->matrix[index];
                 if (value > 0) {
                     obj += value;
@@ -556,7 +569,7 @@ long getNeighbourhoodSize(struct solution *s, const enum SubNeighbourhood nh)
             return 0;
         }
         else {
-            return cur_num_groups + 1;
+            return s->cur_num_groups + 1;
         }
     case REMOVE:
         if (s->cur_num_components == 0) {
@@ -617,9 +630,21 @@ struct solution *resetEnumSolutionComponents(struct solution *s, const enum Comp
  */
 struct solution *heuristicSolution(struct solution *s)
 {
-    /*
-     * IMPLEMENT HERE
-     */
+    struct move  *v = allocMove(s->prob);
+    if (s->cur_num_components < s->prob->n) {
+        for(int i = s->cur_num_components; i < s->prob->n ; i++) {
+            v->node = i;
+            v->group = randint(s->cur_num_groups);
+            s->nodes[s->cur_num_components] = v->group;
+            if (v->group == s->cur_num_components) {
+                s->cur_num_groups++;
+            }
+            s->cur_num_components++;
+            s->groups[v->group][s->group_sizes[v->group]] = v->node;
+            s->group_sizes[v->group]++;
+            s->evalv = 0;
+        }
+    }
     return s;
 }
 
@@ -670,6 +695,78 @@ struct move *copyMove(struct move *dest, const struct move *src)
 /*
  * Move evaluation
  */
+static double lbi_add(const struct move *v, const struct solution *s)
+{
+    int node = v->node;
+    int group = v->group;
+    int index;
+    int val;
+    double obj = 0.0;
+
+    for(int i = 0; i < s->group_sizes[group]; ++i){
+        if(s->groups[group][i] != node){
+            index = index_calc(s->groups[group][i], node, s->prob->n);
+            val = s->prob->matrix[index];
+
+            if(val < 0){
+                obj += val;
+            }
+        }
+        
+    }
+
+    for(int i = 0; i < s->prob->n; ++i){
+        for(int j = 0; j < s->group_sizes[i]; ++j){
+            if(i != group && s->groups[i][j] != node){
+                index = index_calc(s->groups[i][j], node, s->prob->n);
+                val = s->prob->matrix[index];
+
+                if(val > 0){
+                    obj -= val;
+                }
+            }
+        }
+    }
+
+    return obj;
+}
+
+static double lbi_remove(const struct move *v, const struct solution *s)
+{
+    int node = v->node;
+    int group = v->group;
+    int index;
+    int val;
+    double obj = 0.0;
+
+    for(int i = 0; i < s->group_sizes[group]; ++i){
+        if(s->groups[group][i] != node){
+            index = index_calc(s->groups[group][i], node, s->prob->n);
+            val = s->prob->matrix[index];
+
+            if(val > 0){
+                obj += val;
+            }
+        }
+        
+    }
+
+    for(int i = 0; i < s->prob->n; ++i){
+        for(int j = 0; j < s->group_sizes[i]; ++j){
+            if(i != group && s->groups[i][j] != node){
+                index = index_calc(s->groups[i][j], node, s->prob->n);
+                val = s->prob->matrix[index];
+
+                if(val > 0){
+                    obj -= val;
+                }
+            }
+        }
+    }
+
+    return obj;
+}
+
 double *getObjectiveLBIncrement(double *obji, struct move *v, struct solution *s, const enum SubNeighbourhood nh)
 {
     int i;
@@ -693,11 +790,13 @@ double *getObjectiveLBIncrement(double *obji, struct move *v, struct solution *s
             /*
              * IMPLEMENT HERE
              */
+            *obji = v->objLBi = lbi_add(v, s);
             break;
         case REMOVE:
             /*
              * IMPLEMENT HERE
              */
+            *obji = v->objLBi = lbi_remove(v, s);
             break;
         default:
             *obji = v->objLBi = DBL_MAX;
@@ -709,17 +808,6 @@ double *getObjectiveLBIncrement(double *obji, struct move *v, struct solution *s
 }
 
 /*
- * Return the unique component identifier with respect to a given move
- */
-long getComponentFromMove(const struct move *v)
-{
-    /*
-     * IMPLEMENT HERE
-     */
-    return v->node;  
-}
-
-/*
  * Uniform random sampling with replacement of a given subneighbourhood of a
  * solution
  */
@@ -728,13 +816,21 @@ struct move *randomMove(struct move *v, struct solution *s, const enum SubNeighb
     /* subneighbourhood nh of solution is an empty set, cannot generate move */
     switch (nh) {
     case ADD:
-        /*
-         * IMPLEMENT HERE
-         */
+        if (s->cur_num_components < s->prob->n) {
+            v->node = s->cur_num_components;
+            v->group = randint(s->cur_num_groups);
+        }
+        else {
+            return NULL;
+        }
     case REMOVE:
-        /*
-         * IMPLEMENT HERE
-         */
+        if (s->cur_num_components > 0) {
+            v->node = s->cur_num_components - 1;
+            v->group = s->nodes[s->cur_num_components - 1];
+        }
+        else {
+            return NULL;
+        }
     default:
         fprintf(stderr, "Invalid neighbourhood passed to applyMove().\n");
         return NULL;
