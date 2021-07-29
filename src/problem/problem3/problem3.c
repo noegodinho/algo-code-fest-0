@@ -123,6 +123,7 @@ struct problem *newProblem(const char *filename)
     FILE * fp;
     char * line = NULL;
     size_t len = 0;
+    int i = 0;
 
     fp = fopen(filename, "r");
     if (fp == NULL) {
@@ -141,7 +142,13 @@ struct problem *newProblem(const char *filename)
     p->n = n;
     int matrix_size = n*(n-1)/2;
     p->matrix = (double *)malloc(matrix_size * sizeof(double));
-    int i = 0;
+
+    for (i = 1; i <= n; ++i) {
+        p->e *= i;
+    }
+
+    i = 0;
+
     while ((getline(&line, &len, fp)) != -1) {
         //printf("%s", line);
         char *token = strtok(line," ");
