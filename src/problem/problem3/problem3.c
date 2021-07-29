@@ -614,7 +614,7 @@ long enumSolutionComponents(struct solution *s, const enum ComponentState st)
 
 long getComponentFromMove(const struct move *v) 
 {
-    return 0;
+    return index_calc(v->group, v->node, v->prob->n);
 }
 
 /*
