@@ -42,6 +42,7 @@ struct solution {
     int cur_num_components;
     int cur_num_groups;
     int cur_enumMoves;
+    int cur_enumSolutionComponents;
     double objvalue;
     int evalv;    /* Flag indicating if the solution is evaluated */
     double objv;  /* Objective value */
@@ -406,6 +407,7 @@ struct solution *emptySolution(struct solution *s)
     s->evalLB = 0;
     s->objLB = 0;
     s->cur_enumMoves = 0;
+    s->cur_enumSolutionComponents = 0;
 
     return s;
 }
@@ -433,9 +435,9 @@ struct solution *copySolution(struct solution *dest, const struct solution *src)
     dest->objv = src->objv;
     dest->evalLB = src->evalLB;
     dest->objLB = src->objLB;
+    dest->cur_enumMoves = src->cur_enumMoves;
+    dest->cur_enumSolutionComponents = src->cur_enumSolutionComponents;
     return dest;
-
-    struct problem *prob;
 }
 
 /*
@@ -528,6 +530,9 @@ struct solution *applyMove(struct solution *s, const struct move *v, const enum 
         s->objLB += v->objLBi;
     else
         s->evalLB = 0;
+
+    s->cur_enumMoves = 0;
+    s->cur_enumSolutionComponents = 0;
     return s;
 }
 
@@ -607,6 +612,11 @@ long enumSolutionComponents(struct solution *s, const enum ComponentState st)
     return -1;
 }
 
+long getComponentFromMove(const struct move *v) 
+{
+    return 0;
+}
+
 /*
  * Reset the enumeration of the components of a solution that are in a given
  * state
@@ -645,6 +655,9 @@ struct solution *heuristicSolution(struct solution *s)
             s->evalv = 0;
         }
     }
+
+    s->cur_enumMoves = 0;
+    s->cur_enumSolutionComponents = 0;
     return s;
 }
 
