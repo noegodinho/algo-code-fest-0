@@ -572,6 +572,11 @@ long enumSolutionComponents(struct solution *s, const enum ComponentState st)
         /*
          * IMPLEMENT HERE
          */
+        /*
+        if(s->cur_num_components <= 0)
+            return -1;
+        return s->nodes[s->cur_num_components - 1];    
+        */    
     default:
         fprintf(stderr, "Invalid state passed to enumSolutionComponents().\n");
         break;
@@ -622,7 +627,11 @@ struct move *enumMove(struct move *v, struct solution *s, const enum SubNeighbou
     case ADD:
         /*
          * IMPLEMENT HERE
-         */
+         */        
+        /*
+        if(s->cur_num_components == s->prob->n)
+            return NULL;
+            */
     default:
         fprintf(stderr, "Invalid neighbourhood passed to applyMove().\n");
         return NULL;
@@ -697,6 +706,7 @@ long getComponentFromMove(const struct move *v)
     /*
      * IMPLEMENT HERE
      */
+    return v->node;  
 }
 
 /*
