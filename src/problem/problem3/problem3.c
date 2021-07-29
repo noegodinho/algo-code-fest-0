@@ -41,6 +41,7 @@ struct solution {
     int *group_sizes;
     int cur_num_components;
     int cur_num_groups;
+    int cur_enumMoves;
     double objvalue;
     int evalv;    /* Flag indicating if the solution is evaluated */
     double objv;  /* Objective value */
@@ -404,6 +405,7 @@ struct solution *emptySolution(struct solution *s)
     s->objv = 0;
     s->evalLB = 0;
     s->objLB = 0;
+    s->cur_enumMoves = 0;
 
     return s;
 }
@@ -544,9 +546,7 @@ struct solution *resetEnumMove(struct solution *s, const enum SubNeighbourhood n
 {
     switch (nh) {
     case ADD:
-        /*
-         * IMPLEMENT HERE
-         */
+        s->cur_enumMoves = 0;
     case REMOVE:
         /*
          * IMPLEMENT HERE
@@ -660,13 +660,14 @@ struct move *enumMove(struct move *v, struct solution *s, const enum SubNeighbou
     /* subneighbourhood nh of solution is an empty set, cannot generate move */
     switch (nh) {
     case ADD:
-        /*
-         * IMPLEMENT HERE
-         */        
-        /*
-        if(s->cur_num_components == s->prob->n)
+        if (s->cur_enumMove < s->cur_num_groups && s->cur_num_components < s->prob->n) {
+            v->node = s->cur_num_components;
+            v->group = s->cur_enumMove;
+            s->cur_enumMove++;
+        }
+        else {
             return NULL;
-            */
+        }
     default:
         fprintf(stderr, "Invalid neighbourhood passed to applyMove().\n");
         return NULL;
