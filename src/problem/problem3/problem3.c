@@ -712,18 +712,15 @@ static double lbi_add(const struct move *v, const struct solution *s)
                 obj += val;
             }
         }
-        
     }
 
     for(int i = 0; i < s->prob->n; ++i){
-        for(int j = 0; j < s->group_sizes[i]; ++j){
-            if(i != group && s->groups[i][j] != node){
-                index = index_calc(s->groups[i][j], node, s->prob->n);
-                val = s->prob->matrix[index];
+        if(i != node && s->nodes[i] != group){
+            index = index_calc(i, node, s->prob->n);
+            val = s->prob->matrix[index];
 
-                if(val > 0){
-                    obj -= val;
-                }
+            if(val > 0){
+                obj -= val;
             }
         }
     }
@@ -752,14 +749,12 @@ static double lbi_remove(const struct move *v, const struct solution *s)
     }
 
     for(int i = 0; i < s->prob->n; ++i){
-        for(int j = 0; j < s->group_sizes[i]; ++j){
-            if(i != group && s->groups[i][j] != node){
-                index = index_calc(s->groups[i][j], node, s->prob->n);
-                val = s->prob->matrix[index];
+        if(i != node && s->nodes[i] != group){
+            index = index_calc(i, node, s->prob->n);
+            val = s->prob->matrix[index];
 
-                if(val > 0){
-                    obj -= val;
-                }
+            if(val > 0){
+                obj -= val;
             }
         }
     }
