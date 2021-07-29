@@ -184,7 +184,7 @@ long getMaxNeighbourhoodSize(const struct problem *p, const enum SubNeighbourhoo
         /*
          * IMPLEMENT HERE
          */
-        return p-n;
+        return p->n;
     case REMOVE:
         /*
          * IMPLEMENT HERE
