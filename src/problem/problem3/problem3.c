@@ -232,10 +232,23 @@ long getMaxSolutionSize(const struct problem *p)
 struct solution *allocSolution(struct problem *p)
 {
     struct solution *s = malloc(sizeof(struct solution));
-    s->prob = p;
     /*
      * IMPLEMENT HERE
      */
+    int n;
+
+    s->prob = p;
+    n = p->n;
+
+    s->nodes = (int *)malloc(n * sizeof(int));
+    s->groups = (int **)malloc(n * sizeof(int *));
+    s->group_sizes = (int *)malloc(n * sizeof(int));
+
+    for(int i = 0; i < n; ++i) {
+        s->groups[i] = (int *)malloc(n * sizeof(int));
+        s->group_sizes[i] = 0;
+    }
+
     return s;
 }
 
@@ -260,6 +273,7 @@ void freeProblem(struct problem *p)
     /*
      * IMPLEMENT HERE
      */
+    free(p->matrix);
     free(p);
 }
 
@@ -271,6 +285,15 @@ void freeSolution(struct solution *s)
     /*
      * IMPLEMENT HERE
      */
+    int n = s->prob->n;
+    free(s->nodes);
+
+    for(int i = 0; i < n; ++i) {
+        free(s->groups[i]);
+    }
+    
+    free(s->groups);
+    free(s->group_sizes);
     free(s);
 }
 
