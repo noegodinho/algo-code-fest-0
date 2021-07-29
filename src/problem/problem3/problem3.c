@@ -39,6 +39,7 @@ struct solution {
     int *nodes;
     int **groups;
     int *group_sizes;
+    int cur_num_components;
     double objvalue;
     int evalv;    /* Flag indicating if the solution is evaluated */
     double objv;  /* Objective value */
