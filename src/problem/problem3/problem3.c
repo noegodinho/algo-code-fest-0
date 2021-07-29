@@ -507,10 +507,10 @@ struct solution *applyMove(struct solution *s, const struct move *v, const enum 
         /*
          * IMPLEMENT HERE
          */
-        s->group_sizes[v->group] = s->group_sizes[v->group] -1;
-        for(int x = 0; x <= s->group_sizes[v->group], x++){
+        s->group_sizes[v->group] = s->group_sizes[v->group] - 1;
+        for(int x = 0; x <= s->group_sizes[v->group]; x++){
             if(s->groups[v->group][x] == v->node){
-                s->groups[v->group][x] = s->groups[v.group][s->group_sizes[v.group]];
+                s->groups[v->group][x] = s->groups[v->group][s->group_sizes[v->group]];
                 break;
             }
         }
