@@ -96,29 +96,6 @@ static void swap_i(int *data, int *idata, const int i, const int j)
     swap(idata, *(data + i), *(data + j));
 }
 
-/*************************/
-/* Problem instantiation */
-/*************************/
-
-/*
- * Problem instantiation
- */
-struct problem *newProblem(const char *filename)
-{
-    FILE *infile;
-    struct problem *p = NULL;
-    infile = fopen(filename, "r");
-    if (infile) {
-        /*
-         * IMPLEMENT HERE
-         */
-        fclose(infile);
-    }
-    else
-        fprintf(stderr, "Cannot open file %s.\n", filename);
-    return p;
-}
-
 int index_calc(int i, int j, int n) {
     if (i > j) {
         int tmp = i;
@@ -132,6 +109,58 @@ int index_calc(int i, int j, int n) {
     index += j - i - 1;
     //return i*(n-1-i) + j-i;
     return index;
+}
+
+/*************************/
+/* Problem instantiation */
+/*************************/
+
+/*
+ * Problem instantiation
+ */
+struct problem *newProblem(const char *filename)
+{
+    FILE * fp;
+    char * line = NULL;
+    size_t len = 0;
+
+    fp = fopen(filename, "r");
+    if (fp == NULL) {
+        fprintf(stderr, "Cannot open file %s.\n", filename);
+        return NULL;
+    }
+    int n = 0;
+    if((getline(&line, &len, fp)) != -1) {
+        n = atoi(line);
+    }
+    if (n == 0) {
+        fprintf(stderr, "Invalid number of vertices: %d\n", n);
+    }
+    struct problem *p = NULL;
+    p = (struct problem *) malloc(sizeof (struct problem));
+    p->n = n;
+    int matrix_size = n*(n-1)/2;
+    p->matrix = (double *)malloc(matrix_size * sizeof(double));
+    int i = 0;
+    while ((getline(&line, &len, fp)) != -1) {
+        //printf("%s", line);
+        char *token = strtok(line," ");
+        int j = i;
+        int value;
+        while(token!=NULL)
+        {
+            if(j > i && j < n) {
+                value = atoi(token);
+                int index = index_calc(i, j, n);
+                p->matrix[index] = (double)value;
+            }
+            token=strtok(NULL," ");
+            ++j;
+        }
+        ++i;
+    }
+    fclose(fp);
+    return p;
 }
 
 /**********************/
@@ -148,10 +177,12 @@ long getMaxNeighbourhoodSize(const struct problem *p, const enum SubNeighbourhoo
         /*
          * IMPLEMENT HERE
          */
+        return p-n;
     case REMOVE:
         /*
          * IMPLEMENT HERE
          */
+        return 1;
     default:
         fprintf(stderr, "Invalid neighbourhood passed to getMaxNeighbourhoodSize().\n");
         break;
@@ -167,6 +198,7 @@ long getNumComponents(const struct problem *p)
     /*
      * IMPLEMENT HERE
      */
+    return p->e;
 }
 
 /*
@@ -177,6 +209,7 @@ long getMaxSolutionSize(const struct problem *p)
     /*
      * IMPLEMENT HERE
      */
+    return p->n;
 }
 
 /*********************/
