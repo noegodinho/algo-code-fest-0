@@ -810,10 +810,16 @@ struct move *randomMove(struct move *v, struct solution *s, const enum SubNeighb
             v->node = s->cur_num_components;
             v->group = randint(s->cur_num_groups);
         }
+        else {
+            return NULL;
+        }
     case REMOVE:
         if (s->cur_num_components > 0) {
             v->node = s->cur_num_components - 1;
             v->group = s->nodes[s->cur_num_components - 1];
+        }
+        else {
+            return NULL;
         }
     default:
         fprintf(stderr, "Invalid neighbourhood passed to applyMove().\n");
