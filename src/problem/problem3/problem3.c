@@ -660,7 +660,7 @@ struct move *enumMove(struct move *v, struct solution *s, const enum SubNeighbou
     /* subneighbourhood nh of solution is an empty set, cannot generate move */
     switch (nh) {
     case ADD:
-        if (s->cur_enumMove < s->cur_num_groups && s->cur_num_components < s->prob->n) {
+        if (s->cur_enumMove <= s->cur_num_groups && s->cur_num_components < s->prob->n) {
             v->node = s->cur_num_components;
             v->group = s->cur_enumMove;
             s->cur_enumMove++;
