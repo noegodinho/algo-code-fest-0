@@ -597,14 +597,14 @@ long enumSolutionComponents(struct solution *s, const enum ComponentState st)
 {
     switch (st) {
     case PRESENT:
-        /*
-         * IMPLEMENT HERE
-         */
-        /*
-        if(s->cur_num_components <= 0)
+        if (s->cur_num_components == 0) {
             return -1;
-        return s->nodes[s->cur_num_components - 1];    
-        */    
+        }
+        else {
+            int identifier = index_calc(s->nodes[s->cur_enumSolutionComponents],s->cur_enumSolutionComponents, s->prob->n);
+            s->cur_enumSolutionComponents++;
+            return identifier;
+        } 
     default:
         fprintf(stderr, "Invalid state passed to enumSolutionComponents().\n");
         break;
