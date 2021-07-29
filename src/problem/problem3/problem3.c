@@ -26,6 +26,9 @@ struct problem {
     /*
      * IMPLEMENT HERE
      */
+    double *matrix;
+    int n; // number of nodes/groups
+    int e; // number of components
 };
 
 struct solution {
@@ -33,6 +36,10 @@ struct solution {
     /*
      * IMPLEMENT HERE
      */
+    int *nodes;
+    int **groups;
+    int *group_sizes;
+    double objvalue;
     int evalv;    /* Flag indicating if the solution is evaluated */
     double objv;  /* Objective value */
     int evalLB;   /* Flag indicating if the lower bound is calculated */
@@ -44,6 +51,8 @@ struct move {
     /*
      * IMPLEMENT HERE
      */
+    int node;
+    int group;
     int evalLBi[2]; /* Flag indicating if lower bound increment is evaluated for subneighbourhoods: { 0 - Add, 1 - Remove } */
     double objLBi;  /* Lower bound increment */
 };
@@ -107,6 +116,21 @@ struct problem *newProblem(const char *filename)
     else
         fprintf(stderr, "Cannot open file %s.\n", filename);
     return p;
+}
+
+int index_calc(int i, int j, int n) {
+    if (i > j) {
+        int tmp = i;
+        i = j;
+        j = tmp;
+    }
+    int index = 0;
+    for(int k = 1; k < i+1; ++k) {
+        index += n - k;
+    }
+    index += j - i - 1;
+    //return i*(n-1-i) + j-i;
+    return index;
 }
 
 /**********************/
@@ -272,7 +296,7 @@ struct solution *emptySolution(struct solution *s)
  */
 struct solution *copySolution(struct solution *dest, const struct solution *src)
 {
-    dest->prob = dest->prob;
+    dest->prob = src->prob;
     /*
      * IMPLEMENT HERE
      */
