@@ -367,11 +367,23 @@ struct solution *copySolution(struct solution *dest, const struct solution *src)
     /*
      * IMPLEMENT HERE
      */
+    memcpy(dest->nodes, src->nodes, src->prob->n * sizeof (int));
+
+    for(int i = 0; i < src->prob->n; ++i) {
+        memcpy(dest->groups[i], src->groups[i], src->group_sizes[i] * sizeof (int));
+        dest->group_sizes[i] = src->group_sizes[i];
+    }
+
+    dest->cur_num_components = src->cur_num_components;
+    dest->cur_num_groups = src->cur_num_groups;
+    dest->objvalue = src->objvalue;
     dest->evalv = src->evalv;
     dest->objv = src->objv;
     dest->evalLB = src->evalLB;
     dest->objLB = src->objLB;
     return dest;
+
+    struct problem *prob;
 }
 
 /*
@@ -569,7 +581,10 @@ struct move *copyMove(struct move *dest, const struct move *src)
     /*
      * IMPLEMENT HERE
      */
-    memcpy(dest->evalLBi, src->evalLBi, 2 * sizeof(int));
+    dest->node = src->node;
+    dest->group = src->group;
+    dest->evalLBi[0] = src->evalLBi[0];
+    dest->evalLBi[1] = src->evalLBi[1];
     dest->objLBi = src->objLBi;
     return dest;
 }
