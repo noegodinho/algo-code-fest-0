@@ -392,6 +392,19 @@ struct solution *emptySolution(struct solution *s)
     /*
      * IMPLEMENT HERE
      */
+    for(int i = 0; i < s->prob->n; ++i){
+        s->nodes[i] = -1;
+        s->group_sizes[i] = 0;
+    }
+
+    s->cur_num_components = 0;
+    s->cur_num_groups = 0;
+    s->objvalue = 0;
+    s->evalv = 0;
+    s->objv = 0;
+    s->evalLB = 0;
+    s->objLB = 0;
+
     return s;
 }
 
@@ -437,7 +450,7 @@ double *getObjectiveVector(double *objv, struct solution *s)
             double groupObjVal = 0;
             for(int j = 0; j < s->group_sizes[i]; ++j) {
                 for(int k = j+1; k < s->group_sizes[i]; ++k) {
-                    index = index_calc(s->groups[i][j], s->groups[i][k], s->prob->n);
+                    int index = index_calc(s->groups[i][j], s->groups[i][k], s->prob->n);
                     groupObjVal += s->prob->matrix[index];
                 }
             }
@@ -459,9 +472,9 @@ double *getObjectiveLB(double *objLB, struct solution *s)
         *objLB = s->objLB;
     else { /* solution s is not evaluated */
         double value;
-        for(int j = cur_num_components; j < s->prob->n; ++j) {
+        for(int j = s->cur_num_components; j < s->prob->n; ++j) {
             for(int k = j+1; k < s->prob->n; ++k) {
-                index = index_calc(j, k, s->prob->n);
+                int index = index_calc(j, k, s->prob->n);
                 value = s->prob->matrix[index];
                 if (value > 0) {
                     obj += value;
@@ -546,7 +559,7 @@ long getNeighbourhoodSize(struct solution *s, const enum SubNeighbourhood nh)
             return 0;
         }
         else {
-            return cur_num_groups + 1;
+            return s->cur_num_groups + 1;
         }
     case REMOVE:
         if (s->cur_num_components == 0) {
