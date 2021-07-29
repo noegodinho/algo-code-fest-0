@@ -685,6 +685,78 @@ struct move *copyMove(struct move *dest, const struct move *src)
 /*
  * Move evaluation
  */
+static double lbi_add(const struct move *v, const struct solution *s)
+{
+    int node = v->node;
+    int group = v->group;
+    int index;
+    int val;
+    double obj = 0.0;
+
+    for(int i = 0; i < s->group_sizes[group]; ++i){
+        if(s->groups[group][i] != node){
+            index = index_calc(s->groups[group][i], node, s->prob->n);
+            val = s->prob->matrix[index];
+
+            if(val < 0){
+                obj += val;
+            }
+        }
+        
+    }
+
+    for(int i = 0; i < s->prob->n; ++i){
+        for(int j = 0; j < s->group_sizes[i]; ++j){
+            if(i != group && s->groups[i][j] != node){
+                index = index_calc(s->groups[i][j], node, s->prob->n);
+                val = s->prob->matrix[index];
+
+                if(val > 0){
+                    obj -= val;
+                }
+            }
+        }
+    }
+
+    return obj;
+}
+
+static double lbi_remove(const struct move *v, const struct solution *s)
+{
+    int node = v->node;
+    int group = v->group;
+    int index;
+    int val;
+    double obj = 0.0;
+
+    for(int i = 0; i < s->group_sizes[group]; ++i){
+        if(s->groups[group][i] != node){
+            index = index_calc(s->groups[group][i], node, s->prob->n);
+            val = s->prob->matrix[index];
+
+            if(val > 0){
+                obj += val;
+            }
+        }
+        
+    }
+
+    for(int i = 0; i < s->prob->n; ++i){
+        for(int j = 0; j < s->group_sizes[i]; ++j){
+            if(i != group && s->groups[i][j] != node){
+                index = index_calc(s->groups[i][j], node, s->prob->n);
+                val = s->prob->matrix[index];
+
+                if(val > 0){
+                    obj -= val;
+                }
+            }
+        }
+    }
+
+    return obj;
+}
+
 double *getObjectiveLBIncrement(double *obji, struct move *v, struct solution *s, const enum SubNeighbourhood nh)
 {
     int i;
@@ -708,11 +780,13 @@ double *getObjectiveLBIncrement(double *obji, struct move *v, struct solution *s
             /*
              * IMPLEMENT HERE
              */
+            *obji = v->objLBi = lbi_add(v, s);
             break;
         case REMOVE:
             /*
              * IMPLEMENT HERE
              */
+            *obji = v->objLBi = lbi_remove(v, s);
             break;
         default:
             *obji = v->objLBi = DBL_MAX;
@@ -721,17 +795,6 @@ double *getObjectiveLBIncrement(double *obji, struct move *v, struct solution *s
         v->evalLBi[i] = 1;
     }
     return obji;
-}
-
-/*
- * Return the unique component identifier with respect to a given move
- */
-long getComponentFromMove(const struct move *v)
-{
-    /*
-     * IMPLEMENT HERE
-     */
-    return v->node;  
 }
 
 /*
