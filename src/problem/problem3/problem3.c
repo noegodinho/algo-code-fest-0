@@ -552,10 +552,13 @@ struct solution *resetEnumMove(struct solution *s, const enum SubNeighbourhood n
     switch (nh) {
     case ADD:
         s->cur_enumMoves = 0;
+        return s;
     case REMOVE:
         /*
          * IMPLEMENT HERE
          */
+        s->cur_enumMoves = 0;
+        return s;
     default:
         fprintf(stderr, "Invalid neighbourhood passed to resetEnumMove().\n");
         break;
@@ -629,6 +632,7 @@ struct solution *resetEnumSolutionComponents(struct solution *s, const enum Comp
          * IMPLEMENT HERE
          */
         s->cur_enumSolutionComponents = 0;
+        return s;
     default:
         fprintf(stderr, "Invalid state passed to resetEnumSolutionComponents().\n");
         break;
@@ -683,7 +687,7 @@ struct move *enumMove(struct move *v, struct solution *s, const enum SubNeighbou
             return NULL;
         }
     default:
-        fprintf(stderr, "Invalid neighbourhood passed to applyMove().\n");
+        //fprintf(stderr, "Invalid neighbourhood passed to applyMove().\n");
         return NULL;
     }
     memset(v->evalLBi, 0, sizeof(int) * 2);
@@ -833,6 +837,7 @@ struct move *randomMove(struct move *v, struct solution *s, const enum SubNeighb
         else {
             return NULL;
         }
+        break;
     case REMOVE:
         if (s->cur_num_components > 0) {
             v->node = s->cur_num_components - 1;
@@ -841,6 +846,7 @@ struct move *randomMove(struct move *v, struct solution *s, const enum SubNeighb
         else {
             return NULL;
         }
+        break;
     default:
         fprintf(stderr, "Invalid neighbourhood passed to applyMove().\n");
         return NULL;
