@@ -320,6 +320,24 @@ void printProblem(const struct problem *p)
     /*
      * IMPLEMENT HERE
      */
+    int n = p->n;
+    printf("  \t");
+    for(int i = 0; i < n; ++i) {
+        printf( "%i\t", i);
+    }
+    printf("\n");
+    for(int i = 0; i < n; ++i) {
+        printf("%i|\t", i);
+        for(int j = 0; j < n; ++j) {
+            if (j > i) {
+                printf("%i\t", (int)(p->matrix[index_calc(i, j, n)]));
+            }
+            else {
+                printf(" \t");
+            }
+        }
+        printf("\n");
+    }
 }
 
 /*
@@ -330,6 +348,24 @@ void printSolution(const struct solution *s)
     /*
      * IMPLEMENT HERE
      */
+    int n = s->prob->n;
+    printf("Node: \t");
+    for(int i = 0; i < n; ++i) {
+        printf("%i\t", i);
+    }
+    printf("\n");
+    printf("Group:\t");
+    for(int i = 0; i < n; ++i) {
+        printf("%i\t", s->nodes[i]);
+    }
+    printf("\n\n");
+    for(int i = 0; i < n; ++i) {
+        printf("Group %i: ", i);
+        for(int j = 0; j < s->group_sizes[i]; ++j) {
+            printf("%i ", s->groups[i][j]);
+        }
+        printf("\n");
+    }
 }
 
 /*
@@ -340,6 +376,7 @@ void printMove(const struct move *v)
     /*
      * IMPLEMENT HERE
      */
+    printf("Move (node, group): %d, %d\n", v->node, v->group);
 }
 
 /***************************/
