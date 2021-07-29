@@ -143,6 +143,8 @@ struct problem *newProblem(const char *filename)
     int matrix_size = n*(n-1)/2;
     p->matrix = (double *)malloc(matrix_size * sizeof(double));
 
+    p->e = 0;
+
     for (i = 1; i <= n; ++i) {
         p->e *= i;
     }
