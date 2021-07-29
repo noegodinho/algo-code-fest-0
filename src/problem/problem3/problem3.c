@@ -473,7 +473,7 @@ double *getObjectiveLB(double *objLB, struct solution *s)
     else { /* solution s is not evaluated */
         double value;
         for(int j = s->cur_num_components; j < s->prob->n; ++j) {
-            for(int k = j+1; k < s->prob->n; ++k) {
+            for(int k = 0; k < s->prob->n; ++k) {
                 int index = index_calc(j, k, s->prob->n);
                 value = s->prob->matrix[index];
                 if (value > 0) {
@@ -620,9 +620,21 @@ struct solution *resetEnumSolutionComponents(struct solution *s, const enum Comp
  */
 struct solution *heuristicSolution(struct solution *s)
 {
-    /*
-     * IMPLEMENT HERE
-     */
+    struct move  *v = allocMove(s->prob);
+    if (s->cur_num_components < s->prob->n) {
+        for(int i = s->cur_num_components; i < s->prob->n ; i++) {
+            v->node = i;
+            v->group = randint(s->cur_num_groups);
+            s->nodes[s->cur_num_components] = v->group;
+            if (v->group == s->cur_num_components) {
+                s->cur_num_groups++;
+            }
+            s->cur_num_components++;
+            s->groups[v->group][s->group_sizes[v->group]] = v->node;
+            s->group_sizes[v->group]++;
+            s->evalv = 0;
+        }
+    }
     return s;
 }
 
@@ -731,13 +743,15 @@ struct move *randomMove(struct move *v, struct solution *s, const enum SubNeighb
     /* subneighbourhood nh of solution is an empty set, cannot generate move */
     switch (nh) {
     case ADD:
-        /*
-         * IMPLEMENT HERE
-         */
+        if (s->cur_num_components < s->prob->n) {
+            v->node = s->cur_num_components;
+            v->group = randint(s->cur_num_groups);
+        }
     case REMOVE:
-        /*
-         * IMPLEMENT HERE
-         */
+        if (s->cur_num_components > 0) {
+            v->node = s->cur_num_components - 1;
+            v->group = s->nodes[s->cur_num_components - 1];
+        }
     default:
         fprintf(stderr, "Invalid neighbourhood passed to applyMove().\n");
         return NULL;
