@@ -126,7 +126,6 @@ struct problem *newProblem(const char *filename)
     FILE * fp;
     char * line = NULL;
     size_t len = 0;
-    int i = 0;
 
     fp = fopen(filename, "r");
     if (fp == NULL) {
@@ -140,14 +139,14 @@ struct problem *newProblem(const char *filename)
     if (n == 0) {
         fprintf(stderr, "Invalid number of vertices: %d\n", n);
     }
-    struct problem *p = NULL;
-    p = (struct problem *) malloc(sizeof (struct problem));
+    struct problem *p = (struct problem *) malloc(sizeof (struct problem));
     p->n = n;
     int matrix_size = n*(n-1)/2;
     p->matrix = (double *)malloc(matrix_size * sizeof(double));
 
     p->e = 0;
 
+    int i;
     for (i = 1; i <= n; ++i) {
         p->e *= i;
     }
@@ -233,7 +232,7 @@ long getMaxSolutionSize(const struct problem *p)
  */
 struct solution *allocSolution(struct problem *p)
 {
-    struct solution *s = malloc(sizeof(struct solution));
+    struct solution *s = (struct solution *)malloc(sizeof(struct solution));
     /*
      * IMPLEMENT HERE
      */
@@ -248,7 +247,6 @@ struct solution *allocSolution(struct problem *p)
 
     for(int i = 0; i < n; ++i) {
         s->groups[i] = (int *)malloc(n * sizeof(int));
-        s->group_sizes[i] = 0;
     }
 
     return s;
@@ -551,8 +549,8 @@ struct solution *resetEnumMove(struct solution *s, const enum SubNeighbourhood n
 {
     switch (nh) {
     case ADD:
-        s->cur_enumMoves = 0;
-        return s;
+        //s->cur_enumMoves = 0;
+        //return s;
     case REMOVE:
         /*
          * IMPLEMENT HERE
@@ -686,8 +684,10 @@ struct move *enumMove(struct move *v, struct solution *s, const enum SubNeighbou
         else {
             return NULL;
         }
+
+        break;
     default:
-        //fprintf(stderr, "Invalid neighbourhood passed to applyMove().\n");
+        fprintf(stderr, "Invalid neighbourhood passed to applyMove().\n");
         return NULL;
     }
     memset(v->evalLBi, 0, sizeof(int) * 2);
